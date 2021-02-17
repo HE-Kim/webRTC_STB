@@ -58,7 +58,7 @@ class CallActivity : AppCompatActivity() {
         //친구 추가 버튼
         //DB에서 가져오는 거를 해야함
         callBtn.setOnClickListener {
-            addUsername = friendNameEdit.text.toString()
+            addUsername //= friendNameEdit.text.toString()
            // firebaseRef.child(username).child("info").child("friends").child(addUsername).child("test").setValue("success")
             //   sendCallRequest()
             Addfriend(addUsername)
