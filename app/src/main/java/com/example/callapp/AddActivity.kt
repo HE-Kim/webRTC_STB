@@ -13,7 +13,7 @@ import java.util.*
 
 class AddActivity : AppCompatActivity() {
 
-    var firebaseRef = Firebase.database.getReference("users")
+    var firebaseRef = Firebase.database.getReference("pairing")
     var username =""
 
 
@@ -47,7 +47,8 @@ class AddActivity : AppCompatActivity() {
                 pid_str = "$pid"
             }
 
-            firebaseRef.child(username).child("info").child("Pairing").setValue(pid_str)
+            firebaseRef.child(username).child("Pairing").setValue(pid_str)
+            firebaseRef.child(username).child("user").setValue("none")
         }
 
 
