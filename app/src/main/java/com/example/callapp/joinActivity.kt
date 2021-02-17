@@ -111,7 +111,8 @@ class joinActivity : AppCompatActivity() {
         firebaseRef.child("$userID").child("info").child("receive").setValue("none") // 수신
         firebaseRef.child("$userID").child("info").child("friends").setValue("none") // 친구
         firebaseRef.child("$userID").child("info").child("isAvailable").setValue("none") // 가능한지
-        firebaseRef.child("$userID").child("info").child("type").setValue("STB") // 가능한지
+        firebaseRef.child("$userID").child("info").child("type").setValue("STB")
+        firebaseRef.child("$userID").child("info").child("Pairing").setValue("none")
         val intent = Intent(this, MainActivity::class.java)
         intent.putExtra("username", username)
         startActivity(intent)

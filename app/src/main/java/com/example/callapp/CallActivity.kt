@@ -1,6 +1,7 @@
 package com.example.callapp
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.webkit.*
@@ -61,7 +62,11 @@ class CallActivity : AppCompatActivity() {
             addUsername //= friendNameEdit.text.toString()
            // firebaseRef.child(username).child("info").child("friends").child(addUsername).child("test").setValue("success")
             //   sendCallRequest()
-            Addfriend(addUsername)
+            val intent = Intent(this, AddActivity::class.java)
+            intent.putExtra("username", username)
+            startActivity(intent)
+
+          //  Addfriend(addUsername)
         }
 
         toggleAudioBtn.setOnClickListener {
