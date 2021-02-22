@@ -34,6 +34,7 @@ class CallActivity : AppCompatActivity() {
     // 오디오, 비디오 컨트롤하는 녀석
     var isAudio = true
     var isVideo = true
+    var conn=false
 
 
     val LIST_MENU: MutableList<String> = mutableListOf<String>("")
@@ -80,6 +81,28 @@ class CallActivity : AppCompatActivity() {
             callJavascriptFunction("javascript:toggleVideo(\"${isVideo}\")")
             toggleVideoBtn.setImageResource(if (isVideo) R.drawable.ic_baseline_videocam_24 else R.drawable.ic_baseline_videocam_off_24)
         }
+
+        rejectBtn1.setOnClickListener {
+            // 전화 종료되는 것을 ~ 써여함
+
+            finish()
+            //finish_conn()
+
+
+        }
+
+        firebaseRef.child(username).child("info").child("connection").addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val connection=snapshot.value
+
+                if(conn && connection==false)
+                    finish()//finish_conn()//
+
+            }
+            override fun onCancelled(error: DatabaseError) {
+                println("Failed to read value.")
+            }
+        })
 
         setupWebView()
     }
@@ -284,6 +307,7 @@ class CallActivity : AppCompatActivity() {
     private fun onCallRequest(caller: String?) {
         if (caller == null || caller == "none") return
 
+        friendsUsername=caller
         callLayout.visibility = View.VISIBLE
         incomingCallTxt.text = "$caller is calling..."
 
@@ -308,6 +332,9 @@ class CallActivity : AppCompatActivity() {
         inputLayout.visibility = View.GONE
         listviewlayout.visibility = View.GONE
         callControlLayout.visibility = View.VISIBLE
+
+        firebaseRef.child(username).child("info").child("connection").setValue(true) // 가능한지
+        conn=true
     }
 
 
@@ -333,8 +360,14 @@ class CallActivity : AppCompatActivity() {
     override fun onDestroy() {
 
         firebaseRef.child(username).child("info").child("outgoing").setValue("none") // 발신
-        firebaseRef.child(friendsUsername).child("info").child("receive").setValue("none") // 수신
+        firebaseRef.child(username).child("info").child("receive").setValue("none") // 발신
+        firebaseRef.child(friendsUsername).child("info").child("outgoing").setValue("none")
+        firebaseRef.child(friendsUsername).child("info").child("receive").setValue("none") // 수신 == incoming
         firebaseRef.child(username).child("info").child("isAvailable").setValue("none")
+
+        firebaseRef.child(username).child("info").child("connection").setValue(false)
+        firebaseRef.child(friendsUsername).child("info").child("connection").setValue(false)
+
         webView.loadUrl("about:blank")
         super.onDestroy()
     }
