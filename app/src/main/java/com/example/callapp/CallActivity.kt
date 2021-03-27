@@ -2,6 +2,7 @@ package com.example.callapp
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.net.http.SslError
 import android.os.Bundle
 import android.view.View
 import android.webkit.*
@@ -51,7 +52,7 @@ class CallActivity : AppCompatActivity() {
         username = intent.getStringExtra("username")!!
 
 
-
+        onPeerConnected()
 
         initDatabase(listview, adapter)
 
@@ -227,18 +228,21 @@ class CallActivity : AppCompatActivity() {
 
     //connid 수정
     private fun listenForConnId() {
-        firebaseRef.child(friendsUsername).child("UUID").addValueEventListener(object :
-            ValueEventListener {
-            override fun onCancelled(error: DatabaseError) {}
+        switchToControls()
+        callJavascriptFunction("javascript:call(\"${friendsUsername}\")")
 
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if (snapshot.value == null)
-                    return
-                switchToControls()
-                callJavascriptFunction("javascript:startCall(\"${snapshot.value}\")")
-            }
+        /*    firebaseRef.child(friendsUsername).child("UUID").addValueEventListener(object :
+                ValueEventListener {
+                override fun onCancelled(error: DatabaseError) {}
 
-        })
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.value == null)
+                        return
+                    switchToControls()
+                    callJavascriptFunction("javascript:startCall(\"${snapshot.value}\")")
+                }
+
+            }) */
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -258,12 +262,29 @@ class CallActivity : AppCompatActivity() {
     }
 
     private fun loadVideoCall() {
-        val filePath = "file:android_asset/call.html"  //html 불러오기!
-        webView.loadUrl(filePath) // url(html) load한다
+        // val filePath = "file:android_asset/call.html"  //html 불러오기!
+        //webView.loadUrl(filePath) // url(html) load한다
+        webView.loadUrl("https://13.125.233.161:8443/call.html")
 
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
+                println("웹뷰: webViewClient ")
                 initializePeer()
+            }
+            override fun onReceivedSslError(
+                view: WebView?,
+                handler: SslErrorHandler,
+                error: SslError?
+            ) {
+                handler.proceed() // Ignore SSL certificate errors
+            }
+
+            override fun shouldOverrideUrlLoading(
+                view: WebView?,
+                request: WebResourceRequest?
+            ): Boolean {
+                view?.loadUrl(request?.getUrl().toString());
+                return true;
             }
         }
     }
@@ -272,8 +293,9 @@ class CallActivity : AppCompatActivity() {
     private fun initializePeer() {
         // uniqueId = getUniqueID()
 
+        callJavascriptFunction("javascript:register(\"${username}\")")
 
-        firebaseRef.child(username).child("UUID").addValueEventListener(object : ValueEventListener {
+      /*  firebaseRef.child(username).child("UUID").addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val value = snapshot.value
                     uniqueId= value as String
@@ -284,7 +306,7 @@ class CallActivity : AppCompatActivity() {
                 override fun onCancelled(error: DatabaseError) {
                     println("Failed to read value.")
                 }
-            })
+            })*/
 
 
         //유니크 아이디가 firebase안에 있으면 ""로 나옴 결국 피어 인잇 불가능 ㅠㅠ
@@ -332,6 +354,7 @@ class CallActivity : AppCompatActivity() {
         inputLayout.visibility = View.GONE
         listviewlayout.visibility = View.GONE
         callControlLayout.visibility = View.VISIBLE
+        webView.visibility = View.VISIBLE
 
         firebaseRef.child(username).child("info").child("connection").setValue(true) // 가능한지
         conn=true
